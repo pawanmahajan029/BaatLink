@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Meeting Room</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="chat-container">
+    <h2 id="room-title"></h2>
+
+    <div id="messages" class="messages"></div>
+
+    <div class="input-box">
+      <input type="text" id="messageInput" placeholder="Type message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- Socket.IO client -->
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+  <script src="js/meeting.js"></script>
+</body>
+</html>

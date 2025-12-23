@@ -23,7 +23,7 @@ export const connectToSocket = (server) => {
             connections[path].push(socket.id)
             timeOnline[socket.id] = new Date();
 
-            // FIXED: Loop variable was 'a' but increment was 'i++'
+        
             for (let a = 0; a < connections[path].length; a++) {
                 io.to(connections[path][a]).emit("user-joined", socket.id, connections[path])
             }

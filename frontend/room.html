@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call Room</title>
+    <link rel="stylesheet" href="css/room.css">
+</head>
+<body>
+    <div class="room-container">
+        <!-- Header -->
+        <div class="room-header">
+            <div class="room-info">
+                <span class="room-code">Room: <strong id="roomCodeDisplay"></strong></span>
+                <span class="participant-count" id="participantCount">Participants: 1</span>
+            </div>
+            <button id="leaveBtn" class="btn-danger">Leave Call</button>
+        </div>
+        
+        <!-- Video Grid -->
+        <div class="video-grid" id="videoGrid">
+            <div class="video-container">
+                <video id="localVideo" autoplay muted playsinline></video>
+                <div class="video-label">You</div>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="controls">
+            <button id="toggleVideo" class="control-btn active">
+                <span class="icon">📹</span>
+                <span>Video</span>
+            </button>
+            <button id="toggleAudio" class="control-btn active">
+                <span class="icon">🎤</span>
+                <span>Mic</span>
+            </button>
+            <button id="toggleChat" class="control-btn">
+                <span class="icon">💬</span>
+                <span>Chat</span>
+            </button>
+            <button id="shareScreen" class="control-btn">
+                <span class="icon">🖥️</span>
+                <span>Share</span>
+            </button>
+        </div>
+        
+        <!-- Chat Panel -->
+        <div class="chat-panel" id="chatPanel">
+            <div class="chat-header">
+                <h3>Chat</h3>
+                <button id="closeChat" class="close-btn">✕</button>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" placeholder="Type a message...">
+                <button id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="js/room.js"></script>
+</body>
+</html>
