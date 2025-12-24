@@ -1,18 +1,45 @@
-const socket = io('http://localhost:8000');
-const params = new URLSearchParams(window.location.search);
-const roomCode = params.get('room');
-const username = localStorage.getItem('username') || 'Anonymous';
+// Check authentication
+const token = localStorage.getItem('token');
+const username = localStorage.getItem('username');
 
-let localStream;
-let peers = {};
-let isVideoEnabled = true;
-let isAudioEnabled = true;
+if (!token) {
+    alert('Please login to join a meeting');
+    window.location.href = 'login.html';
+}
+
+// Get room code from URL
+const urlParams = new URLSearchParams(window.location.search);
+const roomCode = urlParams.get('room');
+
+if (!roomCode) {
+    alert('Invalid room code');
+    window.location.href = 'home.html';
+}
 
 // Display room code
 document.getElementById('roomCodeDisplay').textContent = roomCode;
 
-// Initialize
-async function init() {
+// Socket.io connection
+const socket = io('http://localhost:3000', {
+    auth: {
+        token: token
+    }
+});
+
+// WebRTC Configuration
+const configuration = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' }
+    ]
+};
+
+let localStream;
+let peerConnections = {};
+let isVideoEnabled = true;
+let isAudioEnabled = true;
+
+// Initialize media
+async function initMedia() {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({
             video: true,
@@ -20,138 +47,248 @@ async function init() {
         });
         
         document.getElementById('localVideo').srcObject = localStream;
-        socket.emit('join-call', roomCode);
+        
+        // Join room after getting media
+        socket.emit('join-room', { roomCode, username });
     } catch (error) {
         console.error('Error accessing media devices:', error);
-        alert('Could not access camera/microphone');
+        alert('Could not access camera/microphone. Please check permissions.');
     }
 }
 
-// Socket events
-socket.on('user-joined', (socketId, participants) => {
-    console.log('User joined:', socketId);
-    updateParticipantCount(participants.length);
-    createPeerConnection(socketId);
+// Socket event handlers
+socket.on('user-connected', (userId) => {
+    console.log('User connected:', userId);
+    updateParticipantCount();
+    createPeerConnection(userId);
 });
 
-socket.on('user-left', (socketId) => {
-    console.log('User left:', socketId);
-    if (peers[socketId]) {
-        peers[socketId].close();
-        delete peers[socketId];
-        
-        const videoElement = document.getElementById(`video-${socketId}`);
-        if (videoElement) {
-            videoElement.remove();
-        }
+socket.on('user-disconnected', (userId) => {
+    console.log('User disconnected:', userId);
+    if (peerConnections[userId]) {
+        peerConnections[userId].close();
+        delete peerConnections[userId];
     }
-    updateParticipantCount(Object.keys(peers).length + 1);
+    removeVideoElement(userId);
+    updateParticipantCount();
 });
 
-socket.on('signal', async (fromId, message) => {
-    if (!peers[fromId]) {
-        createPeerConnection(fromId);
-    }
-    
-    const peer = peers[fromId];
-    
-    if (message.type === 'offer') {
-        await peer.setRemoteDescription(new RTCSessionDescription(message));
-        const answer = await peer.createAnswer();
-        await peer.setLocalDescription(answer);
-        socket.emit('signal', fromId, answer);
-    } else if (message.type === 'answer') {
-        await peer.setRemoteDescription(new RTCSessionDescription(message));
-    } else if (message.candidate) {
-        await peer.addIceCandidate(new RTCIceCandidate(message));
+socket.on('offer', async ({ offer, from }) => {
+    const pc = createPeerConnection(from);
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    socket.emit('answer', { answer, to: from });
+});
+
+socket.on('answer', async ({ answer, from }) => {
+    const pc = peerConnections[from];
+    if (pc) {
+        await pc.setRemoteDescription(new RTCSessionDescription(answer));
     }
 });
 
-socket.on('chat-message', (data, sender, senderId) => {
-    addChatMessage(sender, data);
+socket.on('ice-candidate', async ({ candidate, from }) => {
+    const pc = peerConnections[from];
+    if (pc) {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+    }
 });
 
-// WebRTC functions
-function createPeerConnection(socketId) {
-    const peer = new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-    });
+socket.on('chat-message', ({ message, sender, timestamp }) => {
+    addChatMessage(message, sender, timestamp);
+});
+
+// Create peer connection
+function createPeerConnection(userId) {
+    if (peerConnections[userId]) {
+        return peerConnections[userId];
+    }
     
+    const pc = new RTCPeerConnection(configuration);
+    peerConnections[userId] = pc;
+    
+    // Add local stream tracks
     localStream.getTracks().forEach(track => {
-        peer.addTrack(track, localStream);
+        pc.addTrack(track, localStream);
     });
     
-    peer.ontrack = (event) => {
-        addRemoteVideo(socketId, event.streams[0]);
+    // Handle remote stream
+    pc.ontrack = (event) => {
+        addVideoElement(userId, event.streams[0]);
     };
     
-    peer.onicecandidate = (event) => {
+    // Handle ICE candidates
+    pc.onicecandidate = (event) => {
         if (event.candidate) {
-            socket.emit('signal', socketId, event.candidate);
+            socket.emit('ice-candidate', {
+                candidate: event.candidate,
+                to: userId
+            });
         }
     };
     
-    peers[socketId] = peer;
-    
-    peer.createOffer().then(offer => {
-        peer.setLocalDescription(offer);
-        socket.emit('signal', socketId, offer);
+    // Create and send offer
+    pc.createOffer().then(offer => {
+        return pc.setLocalDescription(offer);
+    }).then(() => {
+        socket.emit('offer', {
+            offer: pc.localDescription,
+            to: userId
+        });
     });
+    
+    return pc;
 }
 
-function addRemoteVideo(socketId, stream) {
-    let videoContainer = document.getElementById(`video-${socketId}`);
+// Add video element for remote user
+function addVideoElement(userId, stream) {
+    // Remove existing video if any
+    removeVideoElement(userId);
     
-    if (!videoContainer) {
-        videoContainer = document.createElement('div');
-        videoContainer.id = `video-${socketId}`;
-        videoContainer.className = 'video-container';
-        
-        const video = document.createElement('video');
-        video.autoplay = true;
-        video.playsInline = true;
-        video.srcObject = stream;
-        
-        const label = document.createElement('div');
-        label.className = 'video-label';
-        label.textContent = `Participant ${Object.keys(peers).length}`;
-        
-        videoContainer.appendChild(video);
-        videoContainer.appendChild(label);
-        document.getElementById('videoGrid').appendChild(videoContainer);
+    const videoContainer = document.createElement('div');
+    videoContainer.className = 'video-container';
+    videoContainer.id = `video-${userId}`;
+    
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.autoplay = true;
+    video.playsinline = true;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'video-overlay';
+    
+    const label = document.createElement('div');
+    label.className = 'video-label';
+    label.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+        </svg>
+        Participant
+    `;
+    
+    overlay.appendChild(label);
+    videoContainer.appendChild(video);
+    videoContainer.appendChild(overlay);
+    
+    document.getElementById('videoGrid').appendChild(videoContainer);
+}
+
+// Remove video element
+function removeVideoElement(userId) {
+    const videoElement = document.getElementById(`video-${userId}`);
+    if (videoElement) {
+        videoElement.remove();
     }
 }
 
-// Controls
+// Update participant count
+function updateParticipantCount() {
+    const count = Object.keys(peerConnections).length + 1;
+    const text = count === 1 ? '1 participant' : `${count} participants`;
+    document.getElementById('participantCount').textContent = text;
+}
+
+// Control button handlers
 document.getElementById('toggleVideo').addEventListener('click', () => {
     isVideoEnabled = !isVideoEnabled;
-    localStream.getVideoTracks()[0].enabled = isVideoEnabled;
-    document.getElementById('toggleVideo').classList.toggle('active');
+    const videoTrack = localStream.getVideoTracks()[0];
+    if (videoTrack) {
+        videoTrack.enabled = isVideoEnabled;
+    }
+    
+    const btn = document.getElementById('toggleVideo');
+    const iconOn = btn.querySelector('.icon-on');
+    const iconOff = btn.querySelector('.icon-off');
+    
+    if (isVideoEnabled) {
+        btn.classList.add('active');
+        iconOn.style.display = 'block';
+        iconOff.style.display = 'none';
+    } else {
+        btn.classList.remove('active');
+        iconOn.style.display = 'none';
+        iconOff.style.display = 'block';
+    }
 });
 
 document.getElementById('toggleAudio').addEventListener('click', () => {
     isAudioEnabled = !isAudioEnabled;
-    localStream.getAudioTracks()[0].enabled = isAudioEnabled;
-    document.getElementById('toggleAudio').classList.toggle('active');
+    const audioTrack = localStream.getAudioTracks()[0];
+    if (audioTrack) {
+        audioTrack.enabled = isAudioEnabled;
+    }
+    
+    const btn = document.getElementById('toggleAudio');
+    const iconOn = btn.querySelector('.icon-on');
+    const iconOff = btn.querySelector('.icon-off');
+    
+    if (isAudioEnabled) {
+        btn.classList.add('active');
+        iconOn.style.display = 'block';
+        iconOff.style.display = 'none';
+    } else {
+        btn.classList.remove('active');
+        iconOn.style.display = 'none';
+        iconOff.style.display = 'block';
+    }
 });
 
+document.getElementById('shareScreen').addEventListener('click', async () => {
+    try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true
+        });
+        
+        const screenTrack = screenStream.getVideoTracks()[0];
+        
+        // Replace video track in all peer connections
+        Object.values(peerConnections).forEach(pc => {
+            const sender = pc.getSenders().find(s => s.track.kind === 'video');
+            if (sender) {
+                sender.replaceTrack(screenTrack);
+            }
+        });
+        
+        // Replace local video
+        const videoTrack = localStream.getVideoTracks()[0];
+        localStream.removeTrack(videoTrack);
+        localStream.addTrack(screenTrack);
+        
+        screenTrack.onended = () => {
+            // Restore camera when screen sharing ends
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                const newVideoTrack = stream.getVideoTracks()[0];
+                localStream.addTrack(newVideoTrack);
+                
+                Object.values(peerConnections).forEach(pc => {
+                    const sender = pc.getSenders().find(s => s.track.kind === 'video');
+                    if (sender) {
+                        sender.replaceTrack(newVideoTrack);
+                    }
+                });
+            });
+        };
+    } catch (error) {
+        console.error('Error sharing screen:', error);
+    }
+});
+
+// Chat functionality
 document.getElementById('toggleChat').addEventListener('click', () => {
-    document.getElementById('chatPanel').classList.toggle('show');
+    document.getElementById('chatPanel').classList.add('show');
 });
 
 document.getElementById('closeChat').addEventListener('click', () => {
     document.getElementById('chatPanel').classList.remove('show');
 });
 
-document.getElementById('leaveBtn').addEventListener('click', () => {
-    localStream.getTracks().forEach(track => track.stop());
-    window.location.href = 'index.html';
-});
-
-// Chat
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
 document.getElementById('chatInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
 });
 
 function sendMessage() {
@@ -159,29 +296,71 @@ function sendMessage() {
     const message = input.value.trim();
     
     if (message) {
-        socket.emit('chat-message', message, username);
-        addChatMessage(username, message);
+        socket.emit('chat-message', {
+            roomCode,
+            message,
+            sender: username
+        });
         input.value = '';
     }
 }
 
-function addChatMessage(sender, message) {
+function addChatMessage(message, sender, timestamp) {
     const chatMessages = document.getElementById('chatMessages');
+    const chatEmpty = chatMessages.querySelector('.chat-empty');
+    
+    if (chatEmpty) {
+        chatEmpty.remove();
+    }
+    
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message';
     
-    messageDiv.innerHTML = `
-        <div class="message-sender">${sender}</div>
-        <div class="message-text">${message}</div>
-    `;
+    const senderDiv = document.createElement('div');
+    senderDiv.className = 'message-sender';
+    senderDiv.textContent = sender === username ? 'You' : sender;
     
+    const textDiv = document.createElement('div');
+    textDiv.className = 'message-text';
+    textDiv.textContent = message;
+    
+    messageDiv.appendChild(senderDiv);
+    messageDiv.appendChild(textDiv);
     chatMessages.appendChild(messageDiv);
+    
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Show notification badge if chat is closed
+    if (!document.getElementById('chatPanel').classList.contains('show')) {
+        const badge = document.querySelector('.notification-badge');
+        badge.style.display = 'block';
+        const currentCount = parseInt(badge.textContent) || 0;
+        badge.textContent = currentCount + 1;
+    }
 }
 
-function updateParticipantCount(count) {
-    document.getElementById('participantCount').textContent = `Participants: ${count}`;
+// Leave call
+document.getElementById('leaveBtn').addEventListener('click', () => {
+    if (confirm('Are you sure you want to leave this call?')) {
+        leaveCall();
+    }
+});
+
+function leaveCall() {
+    // Stop all tracks
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+    }
+    
+    // Close all peer connections
+    Object.values(peerConnections).forEach(pc => pc.close());
+    
+    // Disconnect socket
+    socket.disconnect();
+    
+    // Redirect to home
+    window.location.href = 'home.html';
 }
 
-// Start
-init();
+// Initialize on page load
+initMedia();

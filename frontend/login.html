@@ -3,37 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Video Call App</title>
-    <link rel="stylesheet" href="css/auth.css">
+    <title>Login - BaatLink</title>
+    <link rel="stylesheet" href="CSS/login.css">
 </head>
 <body>
-    <div class="container">
-        <div class="auth-box">
-            <h1>Welcome Back</h1>
-            <p class="subtitle">Sign in to continue</p>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo-section">
+                <h1 class="brand-logo">BaatLink</h1>
+                <p class="tagline">Connect. Talk. Meet.</p>
+            </div>
+
+            <div class="form-section">
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Please login to continue</p>
+
+                <div id="errorMessage" class="error-message"></div>
+
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label for="username">Username</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            placeholder="Enter your username" 
+                            required
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            placeholder="Enter your password" 
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="login-btn">Login</button>
+                </form>
+
+                <div class="signup-link">
+                    <p>Don't have an account? <a href="signup.html">Sign up</a></p>
                 </div>
-                
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                
-                <button type="submit" class="btn-primary">Login</button>
-                
-                <div class="error-message" id="errorMessage"></div>
-            </form>
-            
-            <p class="switch-auth">
-                Don't have an account? <a href="register.html">Sign up</a>
-            </p>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>Simple, fast and secure video meetings</h2>
+            <ul>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    HD Video Calling
+                </li>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Real-time Chat
+                </li>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Secure Rooms
+                </li>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Screen Sharing
+                </li>
+            </ul>
         </div>
     </div>
-    
-    <script src="js/login.js"></script>
+
+    <script src="JS/login.js"></script>
 </body>
 </html>

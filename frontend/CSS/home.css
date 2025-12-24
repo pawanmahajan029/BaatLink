@@ -1,140 +1,260 @@
+/* ================= GLOBAL ================= */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
+    background: #0f172a;
+    color: white;
 }
 
+/* ================= NAVBAR ================= */
 .navbar {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 20px 50px;
+    background: #020617;
 }
 
-.nav-brand {
-    color: white;
+.logo {
+    color: #38bdf8;
     font-size: 24px;
-    font-weight: bold;
 }
 
-.nav-links {
+.navbar nav {
     display: flex;
     align-items: center;
     gap: 20px;
 }
 
-.user-name {
+.navbar a {
     color: white;
-    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s ease;
 }
 
-.btn-secondary {
-    padding: 8px 20px;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid white;
+.navbar a:hover {
+    color: #38bdf8;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    background: #38bdf8;
+    border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: 500;
-    transition: background 0.3s;
+    color: white;
+    font-weight: 600;
+    transition: background 0.3s ease;
 }
 
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.3);
+.nav-btn:hover {
+    background: #0ea5e9;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
+/* ================= HERO ================= */
+.hero {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     padding: 60px 20px;
 }
 
-.hero-section {
-    text-align: center;
+.hero h1 {
+    font-size: 52px;
+    margin-bottom: 12px;
+}
+
+.hero p {
+    color: #cbd5f5;
+    margin-bottom: 24px;
+    font-size: 18px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.primary-btn {
+    background: #38bdf8;
+    padding: 12px 26px;
+    border: none;
+    border-radius: 6px;
     color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
-.hero-section h1 {
-    font-size: 48px;
-    margin-bottom: 15px;
+.primary-btn:hover {
+    background: #0ea5e9;
 }
 
-.subtitle {
-    font-size: 20px;
+.secondary-btn {
+    background: transparent;
+    border: 1px solid #38bdf8;
+    color: white;
+    padding: 12px 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.secondary-btn:hover {
+    background: #38bdf8;
+}
+
+/* ================= FEATURES ================= */
+.features {
+    padding: 80px 0;
+    text-align: center;
+    overflow: hidden;
+}
+
+.features h2 {
+    font-size: 36px;
     margin-bottom: 50px;
-    opacity: 0.9;
+    color: #38bdf8;
 }
 
-.action-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+.scroll-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.scroll-track {
+    display: flex;
+    gap: 2rem;
+    animation: scroll 25s linear infinite;
+}
+
+.scroll-track:hover {
+    animation-play-state: paused;
+}
+
+.feature-box {
+    min-width: 280px;
+    max-width: 320px;
+    background: rgba(20, 30, 48, 0.8);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(56, 189, 248, 0.4);
+}
+
+.feature-box h3 {
+    color: #38bdf8;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+}
+
+.feature-box p {
+    color: #cbd5f5;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+@keyframes scroll {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+/* ================= HOW IT WORKS ================= */
+.how-it-works {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.how-it-works h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #38bdf8;
+}
+
+.how-it-works ol {
+    list-style-position: inside;
+    color: #cbd5f5;
+    font-size: 18px;
+    line-height: 2;
+}
+
+/* ================= FOOTER ================= */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #020617;
+    color: #94a3b8;
     margin-top: 40px;
 }
 
-.card {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+/* ================= RESPONSIVE ================= */
+
+/* Tablet */
+@media (max-width: 900px) {
+    .hero h1 {
+        font-size: 40px;
+    }
+
+    .features h2 {
+        font-size: 28px;
+    }
 }
 
-.card h3 {
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 24px;
-}
+/* Mobile */
+@media (max-width: 768px) {
 
-.room-input {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 14px;
-    margin-bottom: 15px;
-}
+    /* Navbar: ONLY logo + button */
+    .navbar {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 15px 20px;
+    }
 
-.room-input:focus {
-    outline: none;
-    border-color: #667eea;
-}
+    .navbar nav a {
+        display: none;
+    }
 
-.btn-primary {
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
+    .nav-btn {
+        font-size: 14px;
+        padding: 8px 18px;
+    }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
+    /* Hero */
+    .hero h1 {
+        font-size: 32px;
+    }
 
-.error-message {
-    color: white;
-    background: rgba(231, 76, 60, 0.9);
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 20px;
-    display: none;
-}
+    .hero p {
+        font-size: 16px;
+    }
 
-.error-message.show {
-    display: block;
+    .hero-buttons button {
+        width: 100%;
+        max-width: 260px;
+    }
+
+    footer {
+        font-size: 14px;
+    }
 }
