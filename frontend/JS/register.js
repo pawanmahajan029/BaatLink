@@ -2,32 +2,46 @@ const API_URL = 'http://localhost:8000/api/v1';
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const name = document.getElementById('name').value;
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const errorDiv = document.getElementById('errorMessage');
     const successDiv = document.getElementById('successMessage');
-    
+
     // Hide previous messages
+    errorDiv.textContent = '';
     errorDiv.classList.remove('show');
     successDiv.classList.remove('show');
-    
+
+    // Basic validation
+    if (!name || !username || !password) {
+        errorDiv.textContent = 'All fields are required';
+        errorDiv.classList.add('show');
+        return;
+    }
+
+    if (password.length < 6) {
+        errorDiv.textContent = 'Password must be at least 6 characters';
+        errorDiv.classList.add('show');
+        return;
+    }
+
     try {
-        const response = await fetch('http://localhost:3000/api/auth/register', {
+        const response = await fetch(`${API_URL}/users/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ name, username, password })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             successDiv.textContent = 'Registration successful! Redirecting to login...';
             successDiv.classList.add('show');
-            
+
             // Redirect to login after 2 seconds
             setTimeout(() => {
                 window.location.href = 'login.html';

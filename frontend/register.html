@@ -1,45 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Video Call App</title>
-    <link rel="stylesheet" href="css/auth.css">
+    <title>Register - BaatLink</title>
+    <link rel="stylesheet" href="CSS/auth.css">
 </head>
+
 <body>
-    <div class="container">
+    <div class="auth-container">
         <div class="auth-box">
-            <h1>Create Account</h1>
-            <p class="subtitle">Sign up to get started</p>
-            
-            <form id="registerForm">
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" name="name" required>
+            <div class="logo-section">
+                <h1 class="brand-logo">BaatLink</h1>
+                <p class="tagline">Connect. Talk. Meet.</p>
+            </div>
+
+            <div class="form-section">
+                <h2>Create Account</h2>
+                <p class="subtitle">Sign up to get started</p>
+
+                <div id="errorMessage" class="error-message message"></div>
+                <div id="successMessage" class="success-message message"></div>
+
+                <form id="registerForm">
+                    <div class="input-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Choose a username" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Create a password (min 6 characters)" required
+                            minlength="6">
+                    </div>
+
+                    <button type="submit" class="auth-btn">Sign Up</button>
+                </form>
+
+                <div class="auth-link">
+                    <p>Already have an account? <a href="login.html">Login</a></p>
                 </div>
-                
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required minlength="6">
-                </div>
-                
-                <button type="submit" class="btn-primary">Sign Up</button>
-                
-                <div class="error-message" id="errorMessage"></div>
-                <div class="success-message" id="successMessage"></div>
-            </form>
-            
-            <p class="switch-auth">
-                Already have an account? <a href="login.html">Login</a>
-            </p>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>Join thousands of users connecting worldwide</h2>
+            <ul>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Free to use
+                </li>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    No downloads required
+                </li>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Instant meetings
+                </li>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Secure & Private
+                </li>
+            </ul>
         </div>
     </div>
-    
-    <script src="js/register.js"></script>
+
+    <script src="JS/register.js"></script>
 </body>
+
 </html>
