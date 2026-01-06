@@ -1,3 +1,9 @@
+/* ================= EMERALD THEME ================= */
+:root {
+    --primary-color: #10b981;
+    --primary-hover: #059669;
+}
+
 /* ================= GLOBAL ================= */
 * {
     margin: 0;
@@ -21,7 +27,7 @@ body {
 }
 
 .logo {
-    color: #38bdf8;
+    color: var(--primary-color);
     font-size: 24px;
 }
 
@@ -38,12 +44,12 @@ body {
 }
 
 .navbar a:hover {
-    color: #38bdf8;
+    color: var(--primary-color);
 }
 
 .nav-btn {
     padding: 8px 16px;
-    background: #38bdf8;
+    background: var(--primary-color);
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -53,7 +59,7 @@ body {
 }
 
 .nav-btn:hover {
-    background: #0ea5e9;
+    background: var(--primary-hover);
 }
 
 /* ================= HERO ================= */
@@ -85,7 +91,7 @@ body {
 }
 
 .primary-btn {
-    background: #38bdf8;
+    background: var(--primary-color);
     padding: 12px 26px;
     border: none;
     border-radius: 6px;
@@ -96,12 +102,12 @@ body {
 }
 
 .primary-btn:hover {
-    background: #0ea5e9;
+    background: var(--primary-hover);
 }
 
 .secondary-btn {
     background: transparent;
-    border: 1px solid #38bdf8;
+    border: 1px solid var(--primary-color);
     color: white;
     padding: 12px 26px;
     border-radius: 6px;
@@ -111,7 +117,7 @@ body {
 }
 
 .secondary-btn:hover {
-    background: #38bdf8;
+    background: var(--primary-color);
 }
 
 /* ================= FEATURES ================= */
@@ -124,7 +130,7 @@ body {
 .features h2 {
     font-size: 36px;
     margin-bottom: 50px;
-    color: #38bdf8;
+    color: var(--primary-color);
 }
 
 .scroll-container {
@@ -160,7 +166,7 @@ body {
 }
 
 .feature-box h3 {
-    color: #38bdf8;
+    color: var(--primary-color);
     font-size: 1.4rem;
     margin-bottom: 1rem;
 }
@@ -175,6 +181,7 @@ body {
     from {
         transform: translateX(0);
     }
+
     to {
         transform: translateX(-50%);
     }
@@ -189,7 +196,7 @@ body {
 .how-it-works h2 {
     font-size: 32px;
     margin-bottom: 20px;
-    color: #38bdf8;
+    color: var(--primary-color);
 }
 
 .how-it-works ol {

@@ -50,7 +50,7 @@ function showJoinDialog() {
 
 // Update UI based on login status
 function updateUI() {
-    const navBtn = document.getElementById('navBtn');
+    const authBtn = document.getElementById('authBtn');
     const primaryBtn = document.getElementById('newMeetingBtn');
     const secondaryBtn = document.getElementById('joinMeetingBtn');
 
@@ -58,9 +58,9 @@ function updateUI() {
 
     if (isLoggedIn()) {
         // User is logged in
-        if (navBtn) {
-            navBtn.textContent = 'Logout';
-            navBtn.onclick = logout;
+        if (authBtn) {
+            authBtn.textContent = 'Logout';
+            authBtn.onclick = logout;
         }
 
         if (primaryBtn) {
@@ -74,9 +74,9 @@ function updateUI() {
         }
     } else {
         // User is not logged in - buttons still work but redirect to login
-        if (navBtn) {
-            navBtn.textContent = 'Login';
-            navBtn.onclick = () => window.location.href = 'login.html';
+        if (authBtn) {
+            authBtn.textContent = 'Login';
+            authBtn.onclick = () => window.location.href = 'login.html';
         }
 
         if (primaryBtn) {
@@ -93,12 +93,25 @@ function updateUI() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Logout functionality
+    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        window.location.reload();
+    });
+
+    // Join nav link - same as "Join with Code" button
+    document.getElementById('joinNavLink')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showJoinDialog();
+    });
+
     console.log('Home page loaded');
     updateUI();
 
-    // Display username if logged in
-    if (isLoggedIn()) {
-        const username = getUsername();
+    // Display welcome message if logged in
+    const username = localStorage.getItem('username');
+    if (username) {
         console.log(`Welcome back, ${username}!`);
     }
 });
