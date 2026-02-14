@@ -30,10 +30,22 @@ app.use(express.json({ limit: "40kb" }));
 app.use(express.urlencoded({ limit: "40kb", extended: true }));
 
 // ✅ SERVE FRONTEND
-app.use(express.static(path.join(__dirname, "../../frontend")));
+const frontendPath = path.join(__dirname, "../../frontend");
+console.log("Frontend path:", frontendPath);
+app.use(express.static(frontendPath));
+
+// Health check route
+app.get("/health", (req, res) => {
+    res.json({ status: "ok", message: "Server is running" });
+});
 
 // APIs
 app.use("/api/v1/users", userRoutes);
+
+// Fallback route for SPA - serve home.html for root
+app.get("/", (req, res) => {
+    res.sendFile(path.join(frontendPath, "home.html"));
+});
 
 const start = async () => {
     // Use environment variable for MongoDB connection
