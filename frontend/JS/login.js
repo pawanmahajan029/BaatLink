@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000/api/v1';
+// API URL is now loaded from config.js
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();

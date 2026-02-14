@@ -19,8 +19,9 @@ if (!roomCode) {
 // Display room code
 document.getElementById('roomCodeDisplay').textContent = roomCode;
 
-// Socket.io connection - Updated to port 8000
-const socket = io('http://localhost:8000');
+// Socket.io connection - uses dynamic URL from config.js
+const socket = io(SOCKET_URL);
+
 
 // WebRTC Configuration
 const configuration = {
