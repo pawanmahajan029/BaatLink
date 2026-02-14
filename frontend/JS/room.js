@@ -60,9 +60,10 @@ socket.on('user-joined', (socketId, connections) => {
     console.log('User joined:', socketId, 'Total connections:', connections);
     updateParticipantCount(connections.length);
 
-    // Create peer connection for new user
+    // Only create peer connection for OTHER users, not yourself
     if (socketId !== socket.id) {
-        createPeerConnection(socketId);
+        console.log('Creating peer connection for new user:', socketId);
+        createPeerConnection(socketId, true); // true = create offer
     }
 });
 
@@ -77,23 +78,29 @@ socket.on('user-left', (socketId) => {
 });
 
 socket.on('signal', async (fromId, message) => {
-    console.log('Received signal from:', fromId);
+    console.log('Received signal from:', fromId, 'Type:', message.type || 'candidate');
 
     if (message.type === 'offer') {
-        const pc = createPeerConnection(fromId);
+        // Received an offer, create peer connection and send answer
+        const pc = createPeerConnection(fromId, false); // false = don't create offer
         await pc.setRemoteDescription(new RTCSessionDescription(message));
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         socket.emit('signal', fromId, pc.localDescription);
+        console.log('Sent answer to:', fromId);
     } else if (message.type === 'answer') {
+        // Received an answer to our offer
         const pc = peerConnections[fromId];
         if (pc) {
             await pc.setRemoteDescription(new RTCSessionDescription(message));
+            console.log('Set remote description (answer) from:', fromId);
         }
     } else if (message.candidate) {
+        // Received an ICE candidate
         const pc = peerConnections[fromId];
         if (pc) {
             await pc.addIceCandidate(new RTCIceCandidate(message));
+            console.log('Added ICE candidate from:', fromId);
         }
     }
 });
@@ -104,23 +111,27 @@ socket.on('chat-message', (data, sender, socketIdSender) => {
 });
 
 // Create peer connection
-function createPeerConnection(userId) {
+function createPeerConnection(userId, shouldCreateOffer) {
     if (peerConnections[userId]) {
+        console.log('Peer connection already exists for:', userId);
         return peerConnections[userId];
     }
 
-    console.log('Creating peer connection for:', userId);
+    console.log('Creating peer connection for:', userId, 'shouldCreateOffer:', shouldCreateOffer);
     const pc = new RTCPeerConnection(configuration);
     peerConnections[userId] = pc;
 
     // Add local stream tracks
-    localStream.getTracks().forEach(track => {
-        pc.addTrack(track, localStream);
-    });
+    if (localStream) {
+        localStream.getTracks().forEach(track => {
+            pc.addTrack(track, localStream);
+            console.log('Added local track:', track.kind);
+        });
+    }
 
     // Handle remote stream
     pc.ontrack = (event) => {
-        console.log('Received remote track from:', userId);
+        console.log('Received remote track from:', userId, 'Kind:', event.track.kind);
         addVideoElement(userId, event.streams[0]);
     };
 
@@ -128,17 +139,29 @@ function createPeerConnection(userId) {
     pc.onicecandidate = (event) => {
         if (event.candidate) {
             socket.emit('signal', userId, event.candidate);
+            console.log('Sent ICE candidate to:', userId);
         }
     };
 
-    // Create and send offer
-    pc.createOffer().then(offer => {
-        return pc.setLocalDescription(offer);
-    }).then(() => {
-        socket.emit('signal', userId, pc.localDescription);
-    }).catch(error => {
-        console.error('Error creating offer:', error);
-    });
+    // Handle connection state changes
+    pc.onconnectionstatechange = () => {
+        console.log('Connection state with', userId, ':', pc.connectionState);
+    };
+
+    // Create and send offer only if we should
+    if (shouldCreateOffer) {
+        pc.createOffer()
+            .then(offer => {
+                return pc.setLocalDescription(offer);
+            })
+            .then(() => {
+                socket.emit('signal', userId, pc.localDescription);
+                console.log('Sent offer to:', userId);
+            })
+            .catch(error => {
+                console.error('Error creating offer:', error);
+            });
+    }
 
     return pc;
 }
