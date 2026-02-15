@@ -243,20 +243,45 @@ function setupControls() {
         const btn = document.getElementById('toggleVideo');
         const iconOn = btn.querySelector('.icon-on');
         const iconOff = btn.querySelector('.icon-off');
+        const localVideoContainer = document.getElementById('localVideo').parentElement;
 
         if (isVideoEnabled) {
+            // Camera ON
             btn.classList.add('active');
             iconOn.style.display = 'block';
             iconOff.style.display = 'none';
             btn.setAttribute('data-tooltip', 'Turn off camera');
+            localVideoContainer.classList.remove('camera-off');
+
+            // Remove camera-off overlay if it exists
+            const overlay = localVideoContainer.querySelector('.camera-off-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
         } else {
+            // Camera OFF
             btn.classList.remove('active');
             iconOn.style.display = 'none';
             iconOff.style.display = 'block';
             btn.setAttribute('data-tooltip', 'Turn on camera');
+            localVideoContainer.classList.add('camera-off');
+
+            // Add camera-off overlay if it doesn't exist
+            if (!localVideoContainer.querySelector('.camera-off-overlay')) {
+                const overlay = document.createElement('div');
+                overlay.className = 'camera-off-overlay';
+                overlay.innerHTML = `
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                    <p>Camera Off</p>
+                `;
+                localVideoContainer.appendChild(overlay);
+            }
         }
 
-        console.log('Video toggled:', isVideoEnabled);
+        console.log('Video toggled:', isVideoEnabled, '| Track enabled:', videoTrack?.enabled);
     });
 
     // Toggle Audio

@@ -206,6 +206,46 @@ body {
     }
 }
 
+/* Camera Off Overlay */
+.camera-off-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    z-index: 10;
+    animation: fadeIn 0.3s ease;
+}
+
+.camera-off-overlay svg {
+    color: #888;
+}
+
+.camera-off-overlay p {
+    color: #aaa;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.video-container.camera-off {
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
 /* ================= CONTROLS ================= */
 .controls {
     background: rgba(20, 20, 20, 0.95);
