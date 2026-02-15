@@ -203,11 +203,23 @@ function addVideoElement(userId, stream) {
     const videoContainer = document.createElement('div');
     videoContainer.className = 'video-container';
     videoContainer.id = `video-${userId}`;
+    videoContainer.style.cursor = 'pointer';
+    videoContainer.title = 'Click to view fullscreen';
 
     const video = document.createElement('video');
     video.srcObject = stream;
     video.autoplay = true;
     video.playsinline = true;
+    video.style.cursor = 'pointer';
+    video.title = 'Click to view fullscreen';
+
+    // Add click handler directly to video element
+    video.addEventListener('click', (e) => {
+        console.log('Participant video clicked!', userId);
+        e.stopPropagation();
+        e.preventDefault();
+        openFullscreenVideo(stream, 'Participant');
+    });
 
     const overlay = document.createElement('div');
     overlay.className = 'video-overlay';
@@ -225,6 +237,8 @@ function addVideoElement(userId, stream) {
     overlay.appendChild(label);
     videoContainer.appendChild(video);
     videoContainer.appendChild(overlay);
+
+
 
     videoGrid.appendChild(videoContainer);
 }
@@ -580,6 +594,62 @@ function leaveCall() {
     }
 }
 
+// Fullscreen video modal functionality
+function openFullscreenVideo(stream, label) {
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'fullscreen-video-modal';
+    modal.id = 'fullscreenModal';
+
+    // Create video element
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.autoplay = true;
+    video.playsinline = true;
+    video.muted = label === 'You'; // Mute local video to avoid feedback
+
+    // Create close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'fullscreen-close-btn';
+    closeBtn.innerHTML = `
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    `;
+    closeBtn.onclick = closeFullscreenVideo;
+
+    // Create label
+    const videoLabel = document.createElement('div');
+    videoLabel.className = 'fullscreen-video-label';
+    videoLabel.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+        </svg>
+        ${label}
+    `;
+
+    modal.appendChild(video);
+    modal.appendChild(closeBtn);
+    modal.appendChild(videoLabel);
+    document.body.appendChild(modal);
+
+    // Fade in animation
+    setTimeout(() => modal.classList.add('show'), 10);
+
+    console.log('Opened fullscreen video for:', label);
+}
+
+function closeFullscreenVideo() {
+    const modal = document.getElementById('fullscreenModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+        console.log('Closed fullscreen video');
+    }
+}
+
 // Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing room...');
@@ -589,4 +659,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize media
     initMedia();
+
+    // Add click handler to local video
+    const localVideoContainer = document.querySelector('.video-container');
+    if (localVideoContainer) {
+        localVideoContainer.style.cursor = 'pointer';
+        localVideoContainer.title = 'Click to view fullscreen';
+        localVideoContainer.addEventListener('click', (e) => {
+            console.log('Local video clicked!');
+            e.stopPropagation();
+            if (localStream) {
+                openFullscreenVideo(localStream, 'You');
+            }
+        });
+    }
+
+    // ESC key to close fullscreen
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeFullscreenVideo();
+        }
+    });
 });

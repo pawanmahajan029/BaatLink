@@ -127,6 +127,12 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.video-container video:hover {
+    opacity: 0.9;
 }
 
 .no-video-placeholder {
@@ -159,6 +165,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    pointer-events: none;
+    /* Allow clicks to pass through to video container */
 }
 
 .video-label {
@@ -237,6 +245,7 @@ body {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -580,4 +589,80 @@ body {
     .control-btn span {
         display: none;
     }
+}
+
+/* ================= FULLSCREEN VIDEO MODAL ================= */
+.fullscreen-video-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.fullscreen-video-modal.show {
+    opacity: 1;
+}
+
+.fullscreen-video-modal video {
+    max-width: 95vw;
+    max-height: 95vh;
+    width: auto;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.fullscreen-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(220, 38, 38, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.fullscreen-close-btn:hover {
+    background: rgba(185, 28, 28, 1);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
+}
+
+.fullscreen-video-label {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    border: 2px solid rgba(16, 185, 129, 0.5);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.fullscreen-video-label svg {
+    color: #10b981;
 }
