@@ -53,11 +53,19 @@ function updateUI() {
     const authBtn = document.getElementById('authBtn');
     const primaryBtn = document.getElementById('newMeetingBtn');
     const secondaryBtn = document.getElementById('joinMeetingBtn');
+    const usernameDisplay = document.getElementById('usernameDisplay');
 
     console.log('Updating UI, logged in:', isLoggedIn());
 
     if (isLoggedIn()) {
-        // User is logged in
+        const username = getUsername();
+
+        // User is logged in - show username
+        if (usernameDisplay) {
+            usernameDisplay.textContent = `👤 ${username}`;
+            usernameDisplay.style.display = 'inline-block';
+        }
+
         if (authBtn) {
             authBtn.textContent = 'Logout';
             authBtn.onclick = logout;
@@ -73,7 +81,11 @@ function updateUI() {
             secondaryBtn.onclick = showJoinDialog;
         }
     } else {
-        // User is not logged in - buttons still work but redirect to login
+        // User is not logged in - hide username
+        if (usernameDisplay) {
+            usernameDisplay.style.display = 'none';
+        }
+
         if (authBtn) {
             authBtn.textContent = 'Login';
             authBtn.onclick = () => window.location.href = 'login.html';
