@@ -669,9 +669,16 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Local video clicked!');
             e.stopPropagation();
             if (localStream) {
-                openFullscreenVideo(localStream, 'You');
+                openFullscreenVideo(localStream, username || 'You');
             }
         });
+    }
+
+    // Update local video label with username
+    const localUsernameElement = document.getElementById('localUsername');
+    if (localUsernameElement && username) {
+        localUsernameElement.textContent = username;
+        console.log('Updated local video label with username:', username);
     }
 
     // ESC key to close fullscreen
