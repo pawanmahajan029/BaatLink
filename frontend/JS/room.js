@@ -123,15 +123,23 @@ function createPeerConnection(userId, shouldCreateOffer) {
 
     // Add local stream tracks
     if (localStream) {
-        localStream.getTracks().forEach(track => {
+        const tracks = localStream.getTracks();
+        console.log('📹 Adding', tracks.length, 'tracks to peer connection for:', userId);
+        tracks.forEach(track => {
             pc.addTrack(track, localStream);
-            console.log('Added local track:', track.kind);
+            console.log('   ✅ Added track:', track.kind, '| Enabled:', track.enabled, '| ID:', track.id);
         });
+    } else {
+        console.error('❌ No local stream available when creating peer connection!');
     }
 
     // Handle remote stream
     pc.ontrack = (event) => {
-        console.log('Received remote track from:', userId, 'Kind:', event.track.kind);
+        console.log('✅ Received remote track from:', userId);
+        console.log('   Track kind:', event.track.kind);
+        console.log('   Track enabled:', event.track.enabled);
+        console.log('   Stream ID:', event.streams[0].id);
+        console.log('   Stream tracks:', event.streams[0].getTracks().length);
         addVideoElement(userId, event.streams[0]);
     };
 
@@ -146,6 +154,19 @@ function createPeerConnection(userId, shouldCreateOffer) {
     // Handle connection state changes
     pc.onconnectionstatechange = () => {
         console.log('Connection state with', userId, ':', pc.connectionState);
+        if (pc.connectionState === 'failed') {
+            console.error('❌ Connection failed with:', userId);
+        }
+    };
+
+    // Handle ICE connection state changes
+    pc.oniceconnectionstatechange = () => {
+        console.log('ICE connection state with', userId, ':', pc.iceConnectionState);
+        if (pc.iceConnectionState === 'failed') {
+            console.error('❌ ICE connection failed with:', userId);
+        } else if (pc.iceConnectionState === 'connected') {
+            console.log('✅ ICE connection established with:', userId);
+        }
     };
 
     // Create and send offer only if we should
